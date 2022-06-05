@@ -4,40 +4,44 @@ from utils.utils import get_soup, get_status
 class HDD:
     @staticmethod
     def get_top_50():
+        # This is getting the status of the HDD website and getting the soup of the HDD website.
         url = "https://hitsdailydouble.com/sales_plus_streaming"
         status = get_status(url)
         r = get_soup(url)
 
-        # find tbody
+        # Finding the table with the class "hits_album_chart"
         table = r.find("table", {"class": "hits_album_chart"})
-        # get tr tags from table
+
+        # Finding all the tr tags with the class "hits_album_chart_header_full_alt1" and
+        # "hits_album_chart_header_full_alt2"
         tr1 = table.find_all("tr", {"class": "hits_album_chart_header_full_alt1"})
         tr2 = table.find_all("tr", {"class": "hits_album_chart_header_full_alt2"})
 
-        # get hdd chart status
+        # Getting the status of the HDD chart.
         hdd_status = r.find("div", {"class": "hits_album_chart_version"}).span.text.split(" ")[1].strip()
 
-        # get hdd chart date
+        # Getting the date of the HDD chart.
         chart_date = r.find("div", {"class": "hits_album_chart_date"}).span.text.split("MARKETSHARE")[0].strip()
 
-        # combine table rows header alt 1 and header alt 2 (since HDD has different classes for each)
+        # Combining the two lists into one list.
         tr_all = []
         tr_all.extend(tr1)
         tr_all.extend(tr2)
 
-        # get table data from tr tags
+        # Getting the data from the HDD website and putting it into a list.
         combined_data = []
         for i in tr_all:
-            # get td tags from tr tags
+            # Finding all the td tags from the tr tags.
             td = i.find_all("td")
             data1 = []
             for span in td:
-                # get span tags from td tags
+                # Getting all the span tags from the td tags.
                 span = span.find_all("span")
                 for j in span:
                     # get text from span tags
                     data1.append(j.text)
 
+            # This is checking if the value is "--" and if it is, it will set the value to "none".
             if td[1].text.strip() == "--":
                 lw = "none"
             else:
@@ -48,12 +52,18 @@ class HDD:
             else:
                 change = td[5].text.strip()
 
+            # Splitting the string at the "|" and getting the first value.
             artist = data1[0].split("|")[0].strip()
+            # Splitting the string at the "|" and getting the second value.
             album = data1[0].split("|")[1].strip()
+            # Getting the record label from the HDD website.
             record_label = data1[1].strip()
+            # Getting the total sales from the HDD website.
             total_sales = td[4].text.strip()
+            # Getting the current week value from the HDD website.
             tw = td[2].text.strip()
 
+            # Appending the data to the list.
             combined_data.append(
                 {
                     "LW": lw,
@@ -66,11 +76,13 @@ class HDD:
                 }
             )
 
-        # sort data based on TW value
+        # Sorting the data based on the TW value.
         combined_data.sort(key=lambda x: int(x["TW"]), reverse=False)
 
+        # Creating a dictionary with the keys "status", "list_status", "chart_date", and "data".
         data = {"status": status, "list_status": hdd_status, "chart_date": chart_date, "data": combined_data}
 
+        # This is checking if the status code is not 200, it will raise an exception.
         if status != 200:
             raise Exception("API response: {}".format(status))
         return data
