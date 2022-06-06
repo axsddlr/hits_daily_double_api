@@ -16,7 +16,7 @@ app = FastAPI(
     description="An Unofficial REST API for [Hits Daily Double](https://hitsdailydouble.com/), Made by [Andre "
                 "Saddler]( "
                 "https://github.com/axsddlr)",
-    version="1.0.0",
+    version="1.0.2",
     docs_url="/",
     redoc_url=None,
 )
@@ -43,7 +43,35 @@ hits_dd = HDD()
 @app.get("/top50/", tags=["News"])
 @limiter.limit("250/minute")
 def hits_top_50(request: Request):
+    """
+    It returns the top 50 hits from the hits_dd data structure
+
+    "LW" = "Last Week"\n
+    "TW" = "This Week"\n
+    """
     return hits_dd.get_top_50()
+
+
+@app.get("/overall_streams/", tags=["News"])
+@limiter.limit("250/minute")
+def overall_songs_streams(request: Request):
+    """
+    It returns the top 50 hits from the hits_dd data structure
+
+    "LW" = "Last Week"\n
+    "TW" = "This Week"\n
+    """
+    return hits_dd.get_overall_streams()
+
+
+@app.get("/new_album_releases/", tags=["News"])
+@limiter.limit("250/minute")
+def new_album_releases(request: Request):
+    """
+    > This function returns the new album releases from the hits_dd data dictionary
+    """
+
+    return hits_dd.get_new_album_releases()
 
 
 if __name__ == "__main__":
