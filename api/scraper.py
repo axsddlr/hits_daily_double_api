@@ -1,3 +1,5 @@
+import re
+
 from utils.utils import get_soup, get_status
 
 
@@ -12,10 +14,9 @@ class HDD:
         # Finding the table with the class "hits_album_chart"
         table = r.find("table", {"class": "hits_album_chart"})
 
-        # Finding all the tr tags with the class "hits_album_chart_header_full_alt1" and
-        # "hits_album_chart_header_full_alt2"
-        tr1 = table.find_all("tr", {"class": "hits_album_chart_header_full_alt1"})
-        tr2 = table.find_all("tr", {"class": "hits_album_chart_header_full_alt2"})
+        # This is finding all the tr tags with the class "hits_album_chart_header_full_alt1" and
+        # "hits_album_chart_header_full_alt2".
+        tr = table.find_all("tr", {"class": re.compile("hits_album_chart_header_full_alt*")})
 
         # Getting the status of the HDD chart.
         hdd_status = r.find("div", {"class": "hits_album_chart_version"}).span.text.split(" ")[1].strip()
@@ -23,14 +24,9 @@ class HDD:
         # Getting the date of the HDD chart.
         chart_date = r.find("div", {"class": "hits_album_chart_date"}).span.text.split("MARKETSHARE")[0].strip()
 
-        # Combining the two lists into one list.
-        tr_all = []
-        tr_all.extend(tr1)
-        tr_all.extend(tr2)
-
         # Getting the data from the HDD website and putting it into a list.
         combined_data = []
-        for i in tr_all:
+        for i in tr:
             # Finding all the td tags from the tr tags.
             td = i.find_all("td")
             data1 = []
